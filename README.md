@@ -1,0 +1,1 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/as36spliymbkm6s7?svg=true)](https://ci.appveyor.com/project/jswift911/aqa-page-object-pattern)
