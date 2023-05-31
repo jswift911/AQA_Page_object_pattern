@@ -134,7 +134,7 @@ class MoneyTransferTest {
         transferPage.setTransferAmount(this.transferAmount);
         transferPage.setTransferFromField(card1);
         transferPage.clickTransferButton();
-        transferPage.clickRefreshButton();
+        dashboardPage.clickRefreshButton();
 
         int expected = 15000;
         int actual =  beforeTransferBalance + parseInt(this.transferAmount);

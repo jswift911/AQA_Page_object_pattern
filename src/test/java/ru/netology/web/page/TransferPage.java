@@ -1,18 +1,21 @@
 package ru.netology.web.page;
 
 import com.codeborne.selenide.SelenideElement;
+import org.openqa.selenium.By;
+
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 public class TransferPage {
 
+    private SelenideElement heading = $(By.xpath("//h1[contains(text(),'Пополнение карты')]"));
     private SelenideElement transferAmount = $("[data-test-id='amount'] .input__control");
     private SelenideElement transferFromField = $("[data-test-id='from'] .input__control");
     private SelenideElement transferButton = $("[data-test-id='action-transfer']");
     private SelenideElement cancelButton = $("[data-test-id='action-cancel']");
-    private SelenideElement refreshButton = $("[data-test-id='action-reload']");
 
     public TransferPage() {
-        clickTransferButton();
+        heading.shouldBe(visible);
     }
 
     public void setTransferAmount(String amount) {
@@ -23,15 +26,13 @@ public class TransferPage {
         transferFromField.setValue(cardNumber);
     }
 
-    public void clickTransferButton() {
+    public DashboardPage clickTransferButton() {
         transferButton.click();
+        return new DashboardPage();
     }
 
-    public void clickCancelButton() {
+    public DashboardPage clickCancelButton() {
         cancelButton.click();
-    }
-
-    public void clickRefreshButton() {
-        refreshButton.click();
+        return new DashboardPage();
     }
 }

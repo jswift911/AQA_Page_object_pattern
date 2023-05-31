@@ -11,6 +11,7 @@ import static com.codeborne.selenide.Selenide.$$;
 
 public class DashboardPage {
     private SelenideElement heading = $("[data-test-id=dashboard]");
+    private SelenideElement refreshButton = $("[data-test-id='action-reload']");
 
     public DashboardPage() {
         heading.shouldBe(visible);
@@ -33,7 +34,13 @@ public class DashboardPage {
         return Integer.parseInt(value);
     }
 
-    public void clickCardDepositButton(String id) {
+    public TransferPage clickCardDepositButton(String id) {
         $(String.format("[data-test-id='%s'] [data-test-id='action-deposit']", id)).click();
+        return new TransferPage();
+    }
+
+    public DashboardPage clickRefreshButton() {
+        refreshButton.click();
+        return this;
     }
 }
