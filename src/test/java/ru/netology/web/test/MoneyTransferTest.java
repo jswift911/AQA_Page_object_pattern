@@ -20,11 +20,10 @@ class MoneyTransferTest {
         open("http://localhost:9999");
     }
 
-    // После каждого теста сбрасываем весь баланс обратно
+    // Тест на перевод с карты на карту
 
-    @AfterEach
-    void resetBalance() {
-        open("http://localhost:9999");
+    @Test
+    void shouldTransferCardToCardFirst() {
         LoginPageV2 loginPage = new LoginPageV2();
         var authInfo = DataHelper.getAuthInfo();
         VerificationPage verificationPage = loginPage.validLogin(authInfo);
@@ -36,77 +35,29 @@ class MoneyTransferTest {
         String secondCardId = secondCardInfo.getId();
         String card1 = firstCardInfo.getNumber();
         String card2 = secondCardInfo.getNumber();
-        int firstCardbalance = dashboardPage.getCardBalance(firstCardId);
-        int secondCardbalance = dashboardPage.getCardBalance(secondCardId);
 
-        if (firstCardbalance == secondCardbalance) {
-            return;
-        }
+        //Первая карта
+        dashboardPage.clickCardDepositButton(firstCardId);
+        TransferPage transferPageFirstCard = new TransferPage();
+        transferPageFirstCard.setTransferAmount(this.transferAmount);
+        transferPageFirstCard.setTransferFromField(card2);
+        transferPageFirstCard.clickTransferButton();
+        int expected1 = 15000;
+        int actual1 = dashboardPage.getCardBalance(firstCardId);
+        assertEquals(expected1, actual1);
 
-        if (firstCardbalance < secondCardbalance) {
-            dashboardPage.clickCardDepositButton(firstCardId);
-            TransferPage transferPage = new TransferPage();
-            transferPage.setTransferAmount(this.transferAmount);
-            transferPage.setTransferFromField(card2);
-            transferPage.clickTransferButton();
-        } else {
-            dashboardPage.clickCardDepositButton(secondCardId);
-            TransferPage transferPage = new TransferPage();
-            transferPage.setTransferAmount(this.transferAmount);
-            transferPage.setTransferFromField(card1);
-            transferPage.clickTransferButton();
-        }
+        //Вторая карта
+        dashboardPage.clickCardDepositButton(secondCardId);
+        TransferPage transferPageSecondCard = new TransferPage();
+        transferPageSecondCard.setTransferAmount(this.transferAmount);
+        transferPageSecondCard.setTransferFromField(card1);
+        transferPageSecondCard.clickTransferButton();
+        int expected2 = 10000;
+        int actual2 = dashboardPage.getCardBalance(secondCardId);
+        assertEquals(expected2, actual2);
     }
 
-    // Тест на перевод с карты на карту (1-ая карта)
-
-    @Test
-    void shouldTransferCardToCardFirst() {
-        LoginPageV2 loginPage = new LoginPageV2();
-        var authInfo = DataHelper.getAuthInfo();
-        VerificationPage verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
-        var firstCardInfo = DataHelper.getFirstCardInfo();
-        var secondCardInfo = DataHelper.getSecondCardInfo();
-        String id = firstCardInfo.getId();
-        String card2 = secondCardInfo.getNumber();
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.setTransferAmount(this.transferAmount);
-        transferPage.setTransferFromField(card2);
-        transferPage.clickTransferButton();
-
-        int expected = 15000;
-        int actual = dashboardPage.getCardBalance(id);
-        assertEquals(expected, actual);
-    }
-
-    // Тест на перевод с карты на карту (2-ая карта)
-
-    @Test
-    void shouldTransferCardToCardSecond() {
-        LoginPageV2 loginPage = new LoginPageV2();
-        var authInfo = DataHelper.getAuthInfo();
-        VerificationPage verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
-        var firstCardInfo = DataHelper.getFirstCardInfo();
-        var secondCardInfo = DataHelper.getSecondCardInfo();
-        String id = secondCardInfo.getId();
-        String card1 = firstCardInfo.getNumber();
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.setTransferAmount(this.transferAmount);
-        transferPage.setTransferFromField(card1);
-        transferPage.clickTransferButton();
-
-        int expected = 15000;
-        int actual = dashboardPage.getCardBalance(id);
-        assertEquals(expected, actual);
-    }
-
-    // Тест на отмену перевода (1-ая карта)
+    // Тест на отмену перевода
 
     @Test
     void shouldCancelTransferFirst() {
@@ -116,37 +67,31 @@ class MoneyTransferTest {
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
         var firstCardInfo = DataHelper.getFirstCardInfo();
-        String id = firstCardInfo.getId();
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.clickCancelButton();
-
-        int expected = 10000;
-        int actual = dashboardPage.getCardBalance(id);
-        assertEquals(expected, actual);
-    }
-
-    // Тест на отмену перевода (2-ая карта)
-
-    @Test
-    void shouldCancelTransferSecond() {
-        LoginPageV2 loginPage = new LoginPageV2();
-        var authInfo = DataHelper.getAuthInfo();
-        VerificationPage verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
         var secondCardInfo = DataHelper.getSecondCardInfo();
-        String id = secondCardInfo.getId();
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.clickCancelButton();
+        String firstCardId = firstCardInfo.getId();
+        String secondCardId = secondCardInfo.getId();
 
-        int expected = 10000;
-        int actual = dashboardPage.getCardBalance(id);
-        assertEquals(expected, actual);
+        //Первая карта
+        dashboardPage.clickCardDepositButton(firstCardId);
+        TransferPage transferPageFirstCard = new TransferPage();
+        transferPageFirstCard.clickCancelButton();
+
+        int expected1 = 10000;
+        int actual1 = dashboardPage.getCardBalance(firstCardId);
+        assertEquals(expected1, actual1);
+
+        //Вторая карта
+        dashboardPage.clickCardDepositButton(secondCardId);
+        TransferPage transferPageSecondCard = new TransferPage();
+        transferPageSecondCard.clickCancelButton();
+
+        int expected2 = 10000;
+        int actual2 = dashboardPage.getCardBalance(secondCardId);
+        assertEquals(expected2, actual2);
     }
 
-    // Тест на перевод на ту же карту (1-ая карта)
+
+    // Тест на перевод на ту же карту
 
     @Test
     void shouldCardToThisCardTransferFirst() {
@@ -156,43 +101,37 @@ class MoneyTransferTest {
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
         var firstCardInfo = DataHelper.getFirstCardInfo();
-        String id = firstCardInfo.getId();
+        var secondCardInfo = DataHelper.getSecondCardInfo();
+        String firstCardId = firstCardInfo.getId();
+        String secondCardId = secondCardInfo.getId();
         String card1 = firstCardInfo.getNumber();
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.setTransferAmount(this.transferAmount);
-        transferPage.setTransferFromField(card1);
-        transferPage.clickTransferButton();
+        String card2 = secondCardInfo.getNumber();
 
-        int expected = 10000;
-        int actual = dashboardPage.getCardBalance(id);
-        assertEquals(expected, actual);
+        //Первая карта
+        dashboardPage.clickCardDepositButton(firstCardId);
+        TransferPage transferPageFirstCard = new TransferPage();
+        transferPageFirstCard.setTransferAmount(this.transferAmount);
+        transferPageFirstCard.setTransferFromField(card1);
+        transferPageFirstCard.clickTransferButton();
+
+        int expected1 = 10000;
+        int actual1 = dashboardPage.getCardBalance(firstCardId);
+        assertEquals(expected1, actual1);
+
+        //Вторая карта
+        dashboardPage.clickCardDepositButton(secondCardId);
+        TransferPage transferPageSecondCard = new TransferPage();
+        transferPageSecondCard.setTransferAmount(this.transferAmount);
+        transferPageSecondCard.setTransferFromField(card2);
+        transferPageSecondCard.clickTransferButton();
+
+        int expected2 = 10000;
+        int actual2 = dashboardPage.getCardBalance(secondCardId);
+        assertEquals(expected2, actual2);
     }
 
-    // Тест на перевод на ту же карту (2-ая карта)
 
-    @Test
-    void shouldCardToThisCardTransferSecond() {
-        LoginPageV2 loginPage = new LoginPageV2();
-        var authInfo = DataHelper.getAuthInfo();
-        VerificationPage verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
-        var secondCardinfo = DataHelper.getFirstCardInfo();
-        String id = secondCardinfo.getId();
-        String card2 = secondCardinfo.getNumber();
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.setTransferAmount(this.transferAmount);
-        transferPage.setTransferFromField(card2);
-        transferPage.clickTransferButton();
-
-        int expected = 10000;
-        int actual = dashboardPage.getCardBalance(id);
-        assertEquals(expected, actual);
-    }
-
-    // Тест на кнопку обновить после пополнения (1-ая карта)
+    // Тест на кнопку обновить после пополнения
 
     @Test
     void shouldRefreshButtonFirst() {
@@ -202,44 +141,38 @@ class MoneyTransferTest {
         var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
         var firstCardInfo = DataHelper.getFirstCardInfo();
-        String id = firstCardInfo.getId();
+        var secondCardInfo = DataHelper.getSecondCardInfo();
+        String firstCardId = firstCardInfo.getId();
+        String secondCardId = secondCardInfo.getId();
         String card1 = firstCardInfo.getNumber();
-        int beforeTransferBalance = dashboardPage.getCardBalance(id);
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.setTransferAmount(this.transferAmount);
-        transferPage.setTransferFromField(card1);
-        transferPage.clickTransferButton();
-        dashboardPage.clickRefreshButton();
-
-        int expected = 15000;
-        int actual =  beforeTransferBalance + parseInt(this.transferAmount);
-        assertEquals(expected, actual);
-    }
-
-    // Тест на кнопку обновить после пополнения (2-ая карта)
-
-    @Test
-    void shouldRefreshButtonSecond() {
-        LoginPageV2 loginPage = new LoginPageV2();
-        var authInfo = DataHelper.getAuthInfo();
-        VerificationPage verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        DashboardPage dashboardPage = verificationPage.validVerify(verificationCode);
-        var secondCardInfo = DataHelper.getFirstCardInfo();
-        String id = secondCardInfo.getId();
         String card2 = secondCardInfo.getNumber();
-        int beforeTransferBalance = dashboardPage.getCardBalance(id);
-        dashboardPage.clickCardDepositButton(id);
-        TransferPage transferPage = new TransferPage();
-        transferPage.setTransferAmount(this.transferAmount);
-        transferPage.setTransferFromField(card2);
-        transferPage.clickTransferButton();
+
+        //Первая карта
+        int beforeTransferBalanceFirstCard = dashboardPage.getCardBalance(firstCardId);
+        dashboardPage.clickCardDepositButton(firstCardId);
+        TransferPage transferPageFirstCard = new TransferPage();
+        transferPageFirstCard.setTransferAmount(this.transferAmount);
+        transferPageFirstCard.setTransferFromField(card2);
+        transferPageFirstCard.clickTransferButton();
         dashboardPage.clickRefreshButton();
 
-        int expected = 15000;
-        int actual =  beforeTransferBalance + parseInt(this.transferAmount);
-        assertEquals(expected, actual);
+        int expected1 = 15000;
+        int actual1 =  beforeTransferBalanceFirstCard + parseInt(this.transferAmount);
+        assertEquals(expected1, actual1);
+
+        //Вторая карта
+        int beforeTransferBalanceSecondCard = dashboardPage.getCardBalance(secondCardId);
+        dashboardPage.clickCardDepositButton(secondCardId);
+        TransferPage transferPageSecondCard = new TransferPage();
+        transferPageSecondCard.setTransferAmount(this.transferAmount);
+        transferPageSecondCard.setTransferFromField(card1);
+        transferPageSecondCard.clickTransferButton();
+        dashboardPage.clickRefreshButton();
+
+        int expected2 = 10000;
+        int actual2 =  beforeTransferBalanceSecondCard + parseInt(this.transferAmount);
+        assertEquals(expected2, actual2);
     }
+
 }
 
