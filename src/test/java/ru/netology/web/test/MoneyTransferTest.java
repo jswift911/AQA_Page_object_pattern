@@ -148,7 +148,6 @@ class MoneyTransferTest {
         String card2 = secondCardInfo.getNumber();
 
         //Первая карта
-        int beforeTransferBalanceFirstCard = dashboardPage.getCardBalance(firstCardId);
         dashboardPage.clickCardDepositButton(firstCardId);
         TransferPage transferPageFirstCard = new TransferPage();
         transferPageFirstCard.setTransferAmount(this.transferAmount);
@@ -157,11 +156,10 @@ class MoneyTransferTest {
         dashboardPage.clickRefreshButton();
 
         int expected1 = 15000;
-        int actual1 =  beforeTransferBalanceFirstCard + parseInt(this.transferAmount);
+        int actual1 = dashboardPage.getCardBalance(firstCardId);
         assertEquals(expected1, actual1);
 
         //Вторая карта
-        int beforeTransferBalanceSecondCard = dashboardPage.getCardBalance(secondCardId);
         dashboardPage.clickCardDepositButton(secondCardId);
         TransferPage transferPageSecondCard = new TransferPage();
         transferPageSecondCard.setTransferAmount(this.transferAmount);
@@ -170,7 +168,7 @@ class MoneyTransferTest {
         dashboardPage.clickRefreshButton();
 
         int expected2 = 10000;
-        int actual2 =  beforeTransferBalanceSecondCard + parseInt(this.transferAmount);
+        int actual2 = dashboardPage.getCardBalance(secondCardId);
         assertEquals(expected2, actual2);
     }
 
